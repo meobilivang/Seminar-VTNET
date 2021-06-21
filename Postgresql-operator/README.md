@@ -359,7 +359,7 @@ Each `Operator` would be asserted based on following criterias:
 ## How to `Install` & `Deploy`?
 
 | <img src="./imgs/crunchy-data-operator-logo.png" width="80"/> |  <img src="./imgs/zalando-operator-logo.png" width="80"/>  |
-| ----------- | ----------- | ----------- |
+| ----------- | ----------- |
 | **- Advanced** & **Mostly Automated** installer<br>- Have `default storage class` set up - *most advanced Kubernetes environments*<br>- Use a deploying container (`pgo-container`) -> perform **setup** & **installation** tasks  | - Via `kubectl`: *with some options*: <br>*+ `Manually deploy each maniest`*<br>*+ `Helm chart`* <br>*+ `Kustomization`* |
 
 ## Architecture & Design
