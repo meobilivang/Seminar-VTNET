@@ -15,7 +15,6 @@
   
 - ### [Why `PostgreqSQL Operator`?](#Why-`PostgreqSQL-Operator`?)
 
-- ### [Specific Use Cases](#Specific-Use-Cases)
 
 - ### [How to work with `Operator`?](#How-to-work-with-`Operator`?)
 
@@ -563,6 +562,7 @@ Type of Restore:
 
 ### **High Availability**
 
+- Employs **Synchronous Replication** in order to `guard against transactions loss`.
 - Ensure HA even when `PostGreSQL Operator` is not available. 
 - PostgreSQL ensures HA by themselves -> no `single point of failure`.
 
@@ -691,9 +691,307 @@ Manage PostgreSQL Cluster only. Operations on databases (e.g: `Query`, `Insert`,
 
 <img src="./imgs/zalando-web-ui.png">
 
+---
 # Section 3: Demo Features
 
-TO-DO
+> Some notable features of `Crunchy PostgreSQL Operator` will be on showcase here. Demo for `Zalando Operator` is expected to be updated in near future.
+
+<p align="center">
+	<img src="./imgs/crunchy-data-operator-logo.png" width="425" style="display: block;margin-left: auto;margin-right: auto;"/>
+</p>
+
+**Notes**
+
+- `Crunchy PostgreSQL Operator` running on `pgo` namespace in `K8S` Cluster.
+
+> The workflow of this demo is sequentially displayed in below steps.
+
+## Provisioning `PostgreSQL` Cluster
+
+Create a sample `PostgreSQL Cluster` named `hippo`:
+
+> CRD  `pgCluster` is ultilized to lauch this cluster
+
+- During the building of `hippo`, following objects are registered in Cluster:
+	- `Deployment` 
+	- `Service`: using same name as `cluster`
+	- `PVC`
+	- `pgBackRest Repository`: storing backups
+
+
+```bash
+$ pgo create cluster hippo
+```
+
+<img src="./imgs/crunchy-data-demo-pgbackrest-repo.png">
+
+
+Check status of `hippo`
+
+```bash
+$ pgo test -n pgo hippo
+```
+
+View user credentials to access a `Cluster`:
+
+> To access a cluster, user is required to be authenticated. A default account (user `testuser` & password) is allocated.
+
+```bash
+$ pgo show user -n pgo hippo
+```
+
+To connect to `PostgreSQL cluster`, we need to perform some actions.
+
+- Show service of Cluster via `kubectl` to 
+
+> By default, `PostgreSQL` runs on port **5432**
+
+```bash
+$ kubectl -n pgo get svc
+```
+
+<img src="./imgs/crunchy-data-hippo-svc.png">
+
+- Expose Service (*Perform on another terminal*)
+
+```bash
+$ kubectl -n pgo port-forward svc/hippo 5432:5432
+```
+
+- Connect to `PostgreSQL`:
+
+> Password is prompted at this point. Use credential provided by command: `pgo show user -n pgo hippo`
+
+```bash
+$ psql -h localhost -p 5432 -U testuser hippo
+```
+
+Create a sample table in within `hippo` cluster
+
+- Schema:
+
+```sql
+CREATE TABLE COMPANY(
+   ID INT PRIMARY KEY     NOT NULL,
+   NAME           TEXT    NOT NULL,
+   AGE            INT     NOT NULL,
+   ADDRESS        CHAR(50),
+   SALARY         REAL,
+   JOIN_DATE	  DATE
+);
+
+INSERT INTO COMPANY (ID,NAME,AGE,ADDRESS,SALARY,JOIN_DATE) VALUES (1, 'Paul', 32, 'California', 20000.00,'2021-07-13');
+
+INSERT INTO COMPANY (ID,NAME,AGE,ADDRESS,JOIN_DATE) VALUES (2, 'Allen', 25, 'Texas', '2017-12-13');
+
+#Default `JOIN_DATE` is Empty
+
+INSERT INTO COMPANY (ID,NAME,AGE,ADDRESS,SALARY,JOIN_DATE) VALUES (3, 'Teddy', 23, 'Norway', 20000.00, DEFAULT );
+
+INSERT INTO COMPANY (ID,NAME,AGE,ADDRESS,SALARY,JOIN_DATE) VALUES (4, 'Mark', 25, 'Rich-Mond ', 65000.00, '2007-12-13' ), (5, 'David', 27, 'Texas', 85000.00, '2007-12-13');
+```
+
+- Verify action:
+
+<img src="./imgs/crunchy-data-demo-insert-db.png">
+
+## Dashboard
+
+> By enable `pgAdmin` as a Service, `Crunchy PostgreSQL Operator` offers another approach to connect to Database & manage Cluster with an enhanced UI.
+
+Add `pgAdmin` to Cluster
+
+```bash
+$ pgo create pgadmin -n pgo hippo 
+```
+
+<img src="./imgs/crunchy-data-pgadmin-creating.png">
+
+Accessing `pgAdmin` Dashboard
+
+- After enable `pgAdmin`, it is able to check the `Kubernetes Service` maps with it.
+
+```bash
+$ kubectl -n pgo get svc
+```
+
+- Exposing dashboard
+
+> By default, the dashboard runs on port **5050**
+
+```bash
+$ kubectl -n pgo (--address=0.0.0.0) port-forward svc/hippo-pgadmin 5050:5050 
+```
+
+> Add option `--address=0.0.0.0` to exposes service to host machine of VM.
+
+- Access via Web browser at `http://<Address-of-vm>:5050`
+
+<img src="./imgs/crunchy-data-demo-backup-success-pgadmin-3.png">
+
+## Disaster Recovery
+
+> Assume that `hippo` cluster has been successfully created & inserted with some data. Visit [**Provisioning `PostgreSQL` Cluster**](#Provisioning-`PostgreSQL`-Cluster) section for details.
+
+**Goal**: Test the `Backup` & `Restore` (`Cloning`) capability of `Operator`.
+
+Create a backup of `hippo`
+
+> The Operator would perform an `incremental` backup by default if no option is passed to command. 
+
+```bash
+$ pgo backup hippo
+```
+
+<img src="./imgs/crunchy-data-demo-backup-command.png">
+
+- View backups:
+	<img src="./imgs/crunchy-data-demo-backup-list.png">
+
+Modifying table `company` of `hippo`. 
+
+> To learn how to connect to database, please re-visit [**Provisioning `PostgreSQL` Cluster**](#Provisioning-`PostgreSQL`-Cluster)
+ 
+ - Update the values of `address` to `Hanoi` & `salary` to `123`:
+ 
+ ```sql 
+ UPDATE COMPANY SET ADDRESS = 'Hanoi', SALARY=123;
+ ```
+
+ <img src="./imgs/crunchy-data-demo-update-dbpng.png">
+
+Clone/Restore a new cluster `hippo1` from backup
+
+- Provisioning `hippo1` from specified backup
+
+```bash
+$ pgo create cluster hippo1 \
+  --restore-from hippo \
+  --restore-opts "--type=time --target='2021-06-16 09:41:55 +00000'"
+``` 
+
+Connect to `hippo1` & show database
+
+> To learn how to connect to a database, please re-visit [**Provisioning `PostgreSQL` Cluster**](#Provisioning-`PostgreSQL`-Cluster)
+
+- Expected Result
+
+> Within `hippo1`, values of `address` & `salary` columns in `company` table should be consistent with the old version of `hippo`. 
+
+<img src="./imgs/crunchy-data-demo-backup-success-hippo1.png">
+
+## HA & Auto Pilot
+
+**Goal**: Following features would be on-display in this demo
+
+- **Replicas**
+- **Auto-healing**
+- **Synchronous Replication**
+
+### **Before starting**: 
+
+Delete existing `hippo1`
+
+```bash
+$ pgo delete cluster hippo1
+```
+
+
+Re-create `hippo1` from specified backup of `hippo` & add more option in command
+
+> Creating `hippo1` cluster with 1 `Primary`, 2 `replicas`.
+
+```bash
+$ pgo create cluster hippo1 \
+  --restore-from hippo \
+  --restore-opts "--type=time --target='2021-06-16 09:41:55 +00000'" \
+  --replica-count=2
+``` 
+
+### Lab #1: `Synchronous Replication & Replicas`
+
+As defined, `Replica` pod(s) are `Read-only` (*data is synchronized with `Primary` via **Synchronous Replication** feature*). To verify, we can do as below
+
+- Access a replica Pod via its `Service` & Perform an `Update` query
+	<img src="./imgs/crunchy-data-demo-replica-read-only.png">
+
+### Lab #2: `Auto-healing`
+
+Delete by hand a replica Pod of `hippo1`
+```bash
+$ kubectl delete pods hippo1-mpbl-c5b64b74-w8w65
+```
+
+During the `Termination` of  `hippo1-mpbl-c5b64b74-w8w65`, a new Pod - `hippo1-mpbl-c5b64b74-z8z2r` - is initiated and mounted in the same PVC `hippo1-mpbl`
+ - View `hippo1` cluster
+```bash
+$ pgo show cluster hippo1
+```
+
+<img src="./imgs/crunchy-data-demo-replica-ha-1.png">
+
+After `hippo1-mpbl-c5b64b74-w8w65` is gone, `hippo1-mpbl-c5b64b74-z8z2r` replaces the terminated Pod & becomes new `Replica` of `hippo1`
+
+<img src="./imgs/crunchy-data-demo-replica-ha-2.png">
+
+## Monitoring
+
+### Install PostgreSQL Operator Monitoring Stacks [[17]]()
+
+Install `PostgreSQL Operator Monitoring` via manifests
+
+```bash
+$ kubectl apply -f https://raw.githubusercontent.com/CrunchyData/postgres-operator/v4.7.0/installers/metrics/kubectl/postgres-operator-metrics.yml
+```
+
+<img src="./imgs/crunchy-data-demo-metric-install.png">
+
+Connecting to `Monitoring` solutions:
+
+- Show all `Service` within Cluster
+
+> By default each monitoring service runs on following pods: <br> **Grafana**: 3000 <br> **Prometheus**: 9090 <br> **AlertManager**: 9093
+
+```bash
+$ kubectl get svc -n pgo
+```
+
+<img src="./imgs/crunchy-data-demo-metric-svc-up-highlighted.png">
+
+- Exposing each `Service` at your demand:
+
+
+```bash
+$ kubectl -n pgo --address=0.0.0.0 port-forward svc/crunchy-<name-svc> <port>:<port>
+```
+
+> Add option `--address=0.0.0.0` to exposes service to host machine of VM.
+
+**E.g**: *Exposing `Grafana` to host machine*
+
+```bash
+$ kubectl -n pgo --address=0.0.0.0 port-forward svc/crunchy-grafana 3000:3000
+```
+
+<img src="./imgs/crunchy-data-grafana.png">
+
+
+
+### Monitoring `PostgreSQL Cluster`
+
+Enable `metrics` on `PostgreSQL Cluster`
+
+- Existing cluster:
+
+```bash
+$ pgo update cluster --enable-metrics hippo
+```
+
+- New cluster:
+
+```bash
+$ pgo create cluster --metrics hippo
+```
 
 # References
 
@@ -729,4 +1027,4 @@ TO-DO
 
 [[16] High Availability `Crunchy PostgreSQL Operator`](https://access.crunchydata.com/documentation/postgres-operator/4.7.0/architecture/high-availability/)
 
-[[17] ]()
+[[17] Install PostgreSQL Operator Monitoring](https://access.crunchydata.com/documentation/postgres-operator/4.6.2/installation/metrics/postgres-operator-metrics/)
