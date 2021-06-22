@@ -127,9 +127,11 @@ Now, by utilizing `Operator`, human knowledge on application has been embedded a
 
 ## Why `PostgreqSQL Operator`?
 
-<img src="./imgs/postgresql-logo.png" width="425"/>
-<img src="./imgs/Kubernetes-logo.png" width="425"/> 
-
+<p align="center">
+	<img src="./imgs/postgresql-logo.png" width="425"/>
+	&nbsp; &nbsp; &nbsp; &nbsp;
+	<img src="./imgs/Kubernetes-logo.png" width="425"/> 
+</p>
 
 ```
  Main purpose of the PostgreSQL Operator is to create and update information around the structure of a PostgreSQL Cluster, and to relay information about the overall status and health of a PostgreSQL cluster
@@ -255,8 +257,10 @@ Set up full monitoring & alerting. Rules/Policies for monitoring/alerting agents
 
  #### **Go**: *level 5*
 
-<img src="./imgs/go-lang.png" height="200" style="display: block;margin-left: auto;margin-right: auto;">
-
+<p align="center">
+	<img src="./imgs/go-lang.png" height="200" style="display: block;margin-left: auto;margin-right: auto;">
+</p>
+	
 - **Cons**: Considered to be the most `challenging` option.
 - **Pros**: 
 	- Native to `K8S` runtime environment
@@ -265,12 +269,15 @@ Set up full monitoring & alerting. Rules/Policies for monitoring/alerting agents
 
 #### **Ansible**: *level 5*
 
-<img src="./imgs/ansible-logo.png" height="200" style="display: block;margin-left: auto;margin-right: auto;">
+<p align="center">
+	<img src="./imgs/ansible-logo.png" height="200" style="display: block;margin-left: auto;margin-right: auto;">
+</p>
 
 #### **Helm**: *level 2*
 
-<img src="./imgs/helm-logo.png" height="200" style="display: block;margin-left: auto;margin-right: auto;">
-
+<p align="center">
+	<img src="./imgs/helm-logo.png" height="200" style="display: block;margin-left: auto;margin-right: auto;">
+</p>
 
 ### `Operator` Patterns
 
@@ -325,9 +332,11 @@ Facilitates the process of building your own solution by offering:
 **Getting started** 
 In this Seminar, `Crunchy PostgreSQL Operator` & `Zalando PostgreSQL Operator` have been selected for in-depth consideration.
 
-<img src="./imgs/crunchy-data-operator-logo.png" width="425"/>
-
-<img src="./imgs/zalando-operator-logo.png" width="425"/> 
+<p align="center">
+	<img src="./imgs/crunchy-data-operator-logo.png" width="425"/>
+	&nbsp; &nbsp; &nbsp; &nbsp;
+	<img src="./imgs/zalando-operator-logo.png" width="425"/> 
+</p>
 
 Each `Operator` would be asserted based on following criterias:
 
@@ -343,7 +352,7 @@ Each `Operator` would be asserted based on following criterias:
 
 | Criteria | <img src="./imgs/crunchy-data-operator-logo.png" width="80"/> |   <img src="./imgs/zalando-operator-logo.png" width="80"/>  |
 | ----------- | ----------- | ----------- |
-| **GitHub Stars** | ~1.7k <img src="./imgs/github-starts-crunchy.png" width="425"/> | ~1.8k <img src="./imgs/github-starts-zalando.png" width="80"/> |
+| **GitHub Stars** | ~1.7k <img src="./imgs/github-starts-crunchy.png" width="225"/> | ~1.8k <img src="./imgs/github-starts-zalando.png" width="425"/> |
 | **Open Issues** | 81 | 264 |
 | **Origin Company** | A tech company focuses on deploying `enterprise-grade` PostgreSQL <br><img src="./imgs/crunchy-data-logo.jpg" width="25%" style="display: block;margin-left: auto;margin-right: auto;"> | `Zalando` - a European e-commere focusing on fashion & lifestyle products <br><img src="./imgs/zalando-logo.jpg" width="60%" style="display: block;margin-left: auto;margin-right: auto;"> |
 | **Usage** | IBM, SAS,... | Zalando,...  |
@@ -404,7 +413,9 @@ Revising 5 levels of `Capability` for Operator:
 
 > Features of each Operator would be taken into account sequentially
 
-<img src="./imgs/crunchy-data-operator-logo.png" width="425" style="display: block;margin-left: auto;margin-right: auto;"/>
+<p align="center">
+	<img src="./imgs/crunchy-data-operator-logo.png" width="425" style="display: block;margin-left: auto;margin-right: auto;"/>
+</p>
 
 ### **Perform administrative operations of `PostgreSQL Cluster` via CLI `pgo`**
 
@@ -557,7 +568,7 @@ Type of Restore:
 
 **Mechanism**: ensures the `fault-tolerant` capability of Cluster
 
-> Implements the **[Raft Asslgorithm](https://raft.github.io/)** - `consensus algorithm` [[13]]()
+> Implements the **[Raft Algorithm](https://raft.github.io/)** - `consensus algorithm` [[13]]()
 
 - Each PostgreSQL cluster have multiple nodes. 1 node is `Leader/Primary`, others are `followers/replicas`.
 - `Primary` replicates changes to all `followers` ---> `synchronous replication`.
@@ -589,10 +600,11 @@ Type of Restore:
 
 Built-in components: 
 - `pgMonitor`: includes monitoring solutions `Prometheus`. `Grafana`, `AlertManager`. `postgres_exporter`
-
-<img src="./imgs/prometheus-logo.png" width="125" style="display: inline;margin-left: auto;margin-right: auto;">
-
-<img src="./imgs/grafana-logo.png" width="125" style="display: inline;margin-left: auto;margin-right: auto;">
+<p align="center">
+	<img src="./imgs/prometheus-logo.png" width="125" style="display: inline;margin-left: auto;margin-right: auto;">
+	&nbsp; &nbsp; &nbsp; &nbsp;
+	<img src="./imgs/grafana-logo.png" width="125" style="display: inline;margin-left: auto;margin-right: auto;">
+</p>
 
 - `pgnodemx`
 
@@ -602,7 +614,9 @@ Some monitored parameters:
 - Pod metrics
 ....
 
-<img src="./imgs/zalando-operator-logo.png" width="425" style="display: block;margin-left: auto;margin-right: auto;"/> 
+<p align="center">
+	<img src="./imgs/zalando-operator-logo.png" width="425" style="display: block;margin-left: auto;margin-right: auto;"/> 
+</p>
 
 ## **PostgreSQL Cluster Provisioning**
 
